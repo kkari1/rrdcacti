@@ -7,25 +7,6 @@ import os, glob
 import json
 from os.path import isdir
 
-#기존 rrd 로직
-#1. 웹로그 로그스테이트 파일 << 이게중요하네,, file tail multi 에서 5분마다 파일을 어디까지 읽은건지 파악함
-#2. 웹로그의 in out 을 체크해서 계산한다
-
-#1. 맨처음 각 도메인들의 억세스로그 파일위치를 가져온다. (0이든 아니든 전체)
-#2. 해당 도메인들의 rrd 파일을 만든다. (데이터가 있던없던 전체)
-#3. 해당 파일을 읽어들여 트래픽을 집계하고 마지막 읽은 줄수를 logstate 에 저장한다. (0이든 아니든 전부 표기)
-#4. 집계한 트래픽 데이터를 rrd에 업데이트한다. (0일경우 0 업데이트)
-#
-#1분뒤
-#1. logstate 가 있으므로, 해당 파일을 먼저 참고한다.
-#2. rrd 파일이 존재하므로 패스한다
-#3. logstate 에 표기된 부분 + 1 부터 파일을 읽어들여 트래픽을 집계하고, 마지막 읽은 줄수를 logstate_tmp 에 재저장하고
-#완료되면 기존 logstate 삭제 후 logstate_tmp 파일의 이름을 logstate 로 바꾼다
-#4.집계한 트래픽 데이터를 rrd에 업데이트한다
-
-#create_vhost_rrd.py
-#made by kyh@gabia.com
-
 class createRRD :
 
         def __init__(self) :
@@ -33,8 +14,8 @@ class createRRD :
                 self.access_log = "access_log"
                 self.logstate_file = "/tmp/ace/logstate"
                 self.logstate_tmpfile = "/tmp/ace/logstate_tmp"
-                self.rrd_dir = "/home/httpd/html/traffic_new/rrd"
-                self.img_dir = "/home/httpd/html/traffic_new/img"
+                self.rrd_dir = "/home/traffic/rrd"
+                self.img_dir = "/home/traffic/img"
                 self.timestamp = int(time.time())
 
         #로그파일들의 풀경로를 log_path 에 저장하고 리턴
@@ -193,13 +174,13 @@ class createRRD :
         def makeIndex(self) :
                 imgFiles = self.img_dir + "/*"
                 list = filter(os.path.isfile, sorted(glob.glob(imgFiles), key=os.path.getsize , reverse=True))
-                indexFile = '/home/httpd/html/traffic_new/index.html'
-                indexBakFile='/home/httpd/html/traffic_new/index.html_bak'
+                indexFile = '/home/traffic/index.html'
+                indexBakFile='/home/traffic/index.html_bak'
 
                 f = open(indexBakFile, 'a')
                 f.write("<HEAD><META HTTP-EQUIV=Refresh CONTENT=60></HEAD>\n")
                 for line in list:
-                        line = line.split('/home/httpd/html/traffic_new/')[1]
+                        line = line.split('/home/traffic/')[1]
                         f.write("<tr><td ><img src=%s></a></td>\n"%line)
 
                 f.close()
